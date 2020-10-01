@@ -49,10 +49,15 @@ const Ingredients = () => {
   }
 
   const removeIngredientHandler = ingredientId => {
-    setIngredients(prevIngredients => 
-      prevIngredients.filter((ingredient)=> ingredient.id  !== ingredientId)
-    );
+    fetch(`https://react-hooks-96261.firebaseio.com/ingredients/${ingredientId}.json`, {
+      method: 'DELETE',
+    }).then( response => {
+      setIngredients(prevIngredients => 
+        prevIngredients.filter(ingredient=> ingredient.id  !== ingredientId)
+      );
+    });
   }
+
   return (
     <div className="App">
       <IngredientForm onAddIngredient={addIngredientHandler}/>
