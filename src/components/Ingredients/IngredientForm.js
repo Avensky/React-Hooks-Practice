@@ -7,7 +7,7 @@ import LoadingIndicator from './../UI/LoadingIndicator';
 const IngredientForm = React.memo(props => {
   const [ enteredTitle, setEnteredTitle] = useState('');
   const [ enteredAmount, setEnteredAmount] = useState('');
-
+  console.log('RENDERING INGREDIENT FORM')
 
   const submitHandler = event => {
     event.preventDefault();
@@ -21,7 +21,9 @@ const IngredientForm = React.memo(props => {
         <form onSubmit={submitHandler}>
           <div className="form-control">
             <label htmlFor="title">Name</label>
-            <input type="text" id="title" 
+            <input 
+              type="text" 
+              id="title" 
               value={enteredTitle}
               onChange={ event => {
                 setEnteredTitle(event.target.value)
@@ -30,7 +32,9 @@ const IngredientForm = React.memo(props => {
           </div>
           <div className="form-control">
             <label htmlFor="amount">Amount</label>
-            <input type="number" id="amount" 
+            <input 
+              type="number" 
+              id="amount" 
               value={enteredAmount}
               onChange={ event => {
                 setEnteredAmount(event.target.value)

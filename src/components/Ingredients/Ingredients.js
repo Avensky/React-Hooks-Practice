@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect, useCallback } from 'react';
+import React, { useState, useReducer, useEffect, useCallback, useMemo } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -35,28 +35,31 @@ const httpReducer = (currHttpState, action ) => {
 
 const Ingredients = () => {
   const [ ingredients, dispatch ]        = useReducer(ingredientReducer, []);
-  const [ httpState, dispatchHttp ]      = useReducer(httpReducer, { loading: false, error: null});
+  const [ httpState, dispatchHttp ]      = useReducer(httpReducer, { 
+    loading: false, 
+    error: null
+  });
 
   // const [ ingredients,  setIngredients ] = useState([]);
   // const [ isLoading,    setIsLoading   ] = useState(false);
   // const [ error,        setError       ] = useState();
 
-  useEffect(()=> {
-    fetch('https://react-hooks-96261.firebaseio.com/ingredients.json')
-    .then(response => response.json()
-    .then(responseData => {
-      const loadedIngredients = [];
-      for ( const key in responseData) {
-        loadedIngredients.push({
-          id: key,
-          title: responseData[key].title,
-          amount: responseData[key].amount
-        })
-      }
-      // setIngredients(loadedIngredients);
-      dispatch({type:'SET', ingredients: loadedIngredients});
-    }))
-  }, []);
+  //useEffect(()=> {
+  //  fetch('https://react-hooks-96261.firebaseio.com/ingredients.json')
+  //  .then(response => response.json()
+  //  .then(responseData => {
+  //    const loadedIngredients = [];
+  //    for ( const key in responseData) {
+  //      loadedIngredients.push({
+  //        id: key,
+  //        title: responseData[key].title,
+  //        amount: responseData[key].amount
+  //      })
+  //    }
+  //    // setIngredients(loadedIngredients);
+  //    dispatch({type:'SET', ingredients: loadedIngredients});
+  //  }))
+  //}, []);
 
   useEffect(()=> {
     console.log('Rendering Ingredients', ingredients);
@@ -69,7 +72,7 @@ const Ingredients = () => {
   }, [])
 
 
-  const addIngredientHandler = ingredient => {
+  const addIngredientHandler = useCallback(ingredient => {
     dispatchHttp({type: 'SEND'});
     // setIsLoading(true);
     fetch('https://react-hooks-96261.firebaseio.com/ingredients.json', {
@@ -90,9 +93,9 @@ const Ingredients = () => {
         ingredient: { id: responseData.name, ...ingredient }
       });
     })
-  }
+  }, [])
 
-  const removeIngredientHandler = ingredientId => {
+  const removeIngredientHandler = useCallback(ingredientId => {
     dispatchHttp({type: 'SEND'});
     //setIsLoading(true);
     fetch(`https://react-hooks-96261.firebaseio.com/ingredients/${ingredientId}.json`, {
@@ -108,20 +111,32 @@ const Ingredients = () => {
     .catch( error => {
       dispatchHttp({type: 'ERROR', errorMessage : error.messsage});
     })
-  }
+  }, [])
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     // setError(null);
     dispatchHttp({type: 'CLEAR'});
-  }
+  }, [])
+
+  const ingredientList = useMemo(() => {
+    return (
+      <IngredientList 
+        ingredients={ingredients} 
+        onRemoveItem={removeIngredientHandler}
+      />
+    )
+  }, [ingredients, removeIngredientHandler])
+
   return (
     <div className="App">
       {httpState.error && <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal>}
-      <IngredientForm onAddIngredient={addIngredientHandler} loading={httpState.loading}/>
+      <IngredientForm 
+        onAddIngredient={addIngredientHandler} 
+        loading={httpState.loading}/>
 
       <section>
         <Search onLoadIngredients = {filteredIngredientsHandler}/>
-        <IngredientList ingredients={ingredients} onRemoveItem={removeIngredientHandler}/>
+        {ingredientList}
         {/* Need to add list here! */}
       </section>
     </div>
